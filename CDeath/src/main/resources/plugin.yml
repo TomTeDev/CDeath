@@ -1,0 +1,8 @@
+name: CDeath
+version: '${project.version}'
+main: mucho.more.CDeath
+api-version: 1.17
+prefix: CDeath
+authors: [ Muchomore ]
+description: Custom death plugin
+website: https://github.com/TomTeDev
