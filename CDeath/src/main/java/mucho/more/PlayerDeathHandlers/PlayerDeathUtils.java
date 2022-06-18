@@ -63,11 +63,8 @@ public class PlayerDeathUtils {
         armorStand.setGravity(false);
         armorStand.setMarker(true);
         armorStand.setCustomNameVisible(true);
-        MuchoDebuger.broadcast("Spawn name?");
         armorStand.setCustomName(craftCustomAsName());
-        MuchoDebuger.broadcast("Spawn name?1");
         plugin.getDataHolder().addPlayerArmorStandId(playerID,armorStand.getUniqueId());
-        MuchoDebuger.broadcast("Spawn name?2");
     }
 
     /**
@@ -166,13 +163,9 @@ public class PlayerDeathUtils {
      * Puts player in freeze state
      */
     public void freezePlayer(){
-        MuchoDebuger.broadcast("CD1");
         spawnArmorStandGrave();
-        MuchoDebuger.broadcast("CD2");
         spawnMagicalBat();
-        MuchoDebuger.broadcast("CD3");
         applyBlindness();
-        MuchoDebuger.broadcast("CD4");
         plugin.getDataHolder().addPlayerDeathLoc(playerID,p.getLocation());
         int runnableID = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             @Override
@@ -266,7 +259,6 @@ public class PlayerDeathUtils {
         }
         if(plugin.getDataHolder().applyEffectsOnRevive()){
             List<PotionEffect> effects = plugin.getDataHolder().getEffectsOnRevive();
-            MuchoDebuger.broadcast("Lista efektow rozmiar: "+effects.size());
             for(PotionEffect e: effects){
                 if(e==null)continue;
                 try {

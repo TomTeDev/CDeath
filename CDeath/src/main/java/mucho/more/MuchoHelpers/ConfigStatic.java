@@ -67,8 +67,6 @@ public class ConfigStatic {
     }
 
     private void saveDeafaultConfig() {
-        MuchoDebuger.broadcast("Save Default config!");
-        System.out.println("Save default config");
         if (this.file == null) {
             this.file = new File(this.plugin.getDataFolder(), fileName);
         }

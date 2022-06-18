@@ -255,7 +255,6 @@ public class DataHolder {
     }
     private String craftMessage(String message,String playerName){
         if(message==null){
-            MuchoDebuger.broadcast("CraftMessage = null");
             return null;
         }
         if(playerName!=null){

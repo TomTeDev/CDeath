@@ -13,7 +13,6 @@ public class DismountEntity implements Listener {
     @EventHandler
     public void onEntityDismount(EntityDismountEvent e){
         if(!(e.getDismounted() instanceof Bat))return;
-        MuchoDebuger.broadcast("Its bat!");
         if(!(e.getEntity() instanceof Player p))return;
         PlayerDeathUtils pdu = new PlayerDeathUtils(p,null);
         if(!pdu.isPlayerDeadAlready())return;
