@@ -15,6 +15,12 @@ public class PlayerDeathListener implements Listener {
         double playerHealth = p.getHealth();
         if(damage<playerHealth)return;
         e.setCancelled(true);
-        new PlayerDeathUtils(p).handlePlayerDeath();
+        String killer;
+        if(e.getDamager() instanceof Player g){
+            killer = g.getName();
+        }else{
+            killer = e.getDamager().getName();
+        }
+        new PlayerDeathUtils(p,killer).handlePlayerDeath();
     }
 }

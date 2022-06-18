@@ -1,5 +1,5 @@
 name: CDeath
-version: '${project.version}'
+version: '1.0-SNAPSHOT'
 main: mucho.more.CDeath
 api-version: 1.17
 prefix: CDeath

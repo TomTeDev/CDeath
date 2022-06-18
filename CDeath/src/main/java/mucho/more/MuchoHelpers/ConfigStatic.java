@@ -23,7 +23,7 @@ public class ConfigStatic {
         this.fileName = fileName;
         //Create File
         if(fileName==null){
-            MuchoDebuger.error("[ConfigStatyczny] otrzymał string o wartości null!");
+            MuchoDebuger.error("[ConfigStatyczny] There cant be null value in file name!");
             return;
         }
         saveDeafaultConfig();
@@ -32,7 +32,7 @@ public class ConfigStatic {
             try {
                 this.fileConfig = YamlConfiguration.loadConfiguration(this.file);
             }catch (Exception e){
-                MuchoDebuger.error("[ConfigStatyczny] Plik yaml nie został utworzony!Nazwa pliku: "+fileName);
+                MuchoDebuger.error("[ConfigStatyczny] File cant be created! File name: "+fileName);
             }
         }
         else{
@@ -67,6 +67,8 @@ public class ConfigStatic {
     }
 
     private void saveDeafaultConfig() {
+        MuchoDebuger.broadcast("Save Default config!");
+        System.out.println("Save default config");
         if (this.file == null) {
             this.file = new File(this.plugin.getDataFolder(), fileName);
         }

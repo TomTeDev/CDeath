@@ -2,6 +2,7 @@ package mucho.more.MuchoHelpers;
 
 import mucho.more.CDeath;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 
 import java.util.logging.Level;
 
@@ -15,5 +16,8 @@ public class MuchoDebuger {
     }
     public static void info(String message){
         plugin.getLogger().log(Level.INFO,ChatColor.YELLOW+message);
+    }
+    public static void broadcast(String message){
+        Bukkit.broadcastMessage(message);
     }
 }

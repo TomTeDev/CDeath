@@ -4,13 +4,17 @@ import mucho.more.CDeath;
 import mucho.more.MuchoHelpers.CheckForNull;
 import mucho.more.MuchoHelpers.MuchoDebuger;
 import mucho.more.MuchoHelpers.MuchoSerializer;
+import mucho.more.MuchoHelpers.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,11 +22,13 @@ public class PlayerDeathUtils {
     private Player p;
     private UUID playerID;
     private String playerName;
+    private String reviverOrKiller;
     private final CDeath plugin = CDeath.getPlugin(CDeath.class);
-    public PlayerDeathUtils(Player p){
+    public PlayerDeathUtils(Player p,@Nullable String reviverOrKiller){
         this.p = p;
         this.playerID = p.getUniqueId();
         this.playerName = p.getName();
+        this.reviverOrKiller = reviverOrKiller;
     }
 
     /**
@@ -52,13 +58,16 @@ public class PlayerDeathUtils {
      * and adds Armorstand id to map together with playerId
      */
     private void spawnArmorStandGrave(){
-        ArmorStand armorStand = (ArmorStand) p.getWorld().spawnEntity(p.getLocation(), EntityType.ARMOR_STAND);
+        ArmorStand armorStand = (ArmorStand) p.getWorld().spawnEntity(p.getLocation().clone().add(0,1.5,0), EntityType.ARMOR_STAND);
         armorStand.setInvisible(true);
         armorStand.setGravity(false);
         armorStand.setMarker(true);
         armorStand.setCustomNameVisible(true);
+        MuchoDebuger.broadcast("Spawn name?");
         armorStand.setCustomName(craftCustomAsName());
+        MuchoDebuger.broadcast("Spawn name?1");
         plugin.getDataHolder().addPlayerArmorStandId(playerID,armorStand.getUniqueId());
+        MuchoDebuger.broadcast("Spawn name?2");
     }
 
     /**
@@ -130,7 +139,7 @@ public class PlayerDeathUtils {
      * Spawns invisible bat with no ai and sets player as its passenger
      */
     private void spawnMagicalBat(){
-        Bat bat = (Bat) p.getWorld().spawnEntity(p.getLocation(), EntityType.BAT);
+        Bat bat = (Bat) p.getWorld().spawnEntity(p.getLocation().clone().add(0,-1,0), EntityType.BAT);
         bat.setInvisible(true);
         bat.setAI(false);
         bat.setInvulnerable(true);
@@ -149,6 +158,7 @@ public class PlayerDeathUtils {
         removeBat();
         cancelPlayerSmashRunnable();
         removeBlindness();
+        plugin.getDataHolder().removePlayerDeathLoc(playerID);
         doSmashThings();
     }
 
@@ -156,9 +166,14 @@ public class PlayerDeathUtils {
      * Puts player in freeze state
      */
     public void freezePlayer(){
+        MuchoDebuger.broadcast("CD1");
         spawnArmorStandGrave();
+        MuchoDebuger.broadcast("CD2");
         spawnMagicalBat();
+        MuchoDebuger.broadcast("CD3");
         applyBlindness();
+        MuchoDebuger.broadcast("CD4");
+        plugin.getDataHolder().addPlayerDeathLoc(playerID,p.getLocation());
         int runnableID = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             @Override
             public void run() {
@@ -166,20 +181,101 @@ public class PlayerDeathUtils {
             }
         },plugin.getDataHolder().getDeathTimer()* 20L);
         plugin.getDataHolder().addSmashPlayerTaskId(playerID,runnableID);
+        doFreezeThings();
     }
-
+    public void doFreezeThings(){
+        if(plugin.getDataHolder().sendMessageOnFreeze()){
+            String message = plugin.getDataHolder().getMessageOnFreeze(reviverOrKiller);
+            if(message!=null){
+                p.sendMessage(message);
+            }
+        }
+        if(plugin.getDataHolder().playSoundOnFreeze()){
+            Sound sound = plugin.getDataHolder().getSoundOnFreeze();
+            if(sound!=null){
+                p.playSound(p.getLocation(),sound,10f,1f);
+            }
+        }
+    }
     public void revivePlayer(){
         removeArmorStandGrave();
         removeBat();
         removeBlindness();
         cancelPlayerSmashRunnable();
+        plugin.getDataHolder().removePlayerDeathLoc(playerID);
         doReviveThings();
     }
     private void doSmashThings(){
-        ?
+        if(p==null||!p.isOnline())return;
+        if(plugin.getDataHolder().sendMessageOnSmash()){
+            String message = plugin.getDataHolder().getMessageOnSmash(reviverOrKiller);
+            if(message!=null){
+                p.sendMessage(message);
+            }
+        }
+        if(plugin.getDataHolder().playSoundOnSmash()){
+            Sound sound = plugin.getDataHolder().getSoundOnSmash();
+            if(sound!=null){
+                p.playSound(p.getLocation(),sound,10f,1f);
+            }
+        }
+        p.setHealth(0);
     }
     private void doReviveThings(){
-        ?
+        if(p==null||!p.isOnline())return;
+        if(plugin.getDataHolder().sendMessageOnRevive()){
+            String message = plugin.getDataHolder().getMessageOnRevive(reviverOrKiller);
+            if(message!=null){
+                p.sendMessage(message);
+            }
+        }
+        if(plugin.getDataHolder().playSoundOnRevive()){
+            Sound sound = plugin.getDataHolder().getSoundOnRevive();
+            if(sound!=null){
+                p.playSound(p.getLocation(),sound,10f,1f);
+            }
+        }
+        if(plugin.getDataHolder().setHealthOnRevive()){
+            double health = plugin.getDataHolder().getHealthOnRevive();
+            double maxHealth = 20;
+            try {
+                maxHealth =  p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+            }catch (Exception ignored){
+
+            }
+            if(health>maxHealth){
+                health = maxHealth;
+            }
+            if(health!=0){
+                p.setHealth(health);
+            }
+        }
+        if(plugin.getDataHolder().setHungerOnRevive()){
+            int hunger = plugin.getDataHolder().getHungerOnRevive();
+            int maxHunger = 20;
+            if(hunger>maxHunger){
+                hunger = maxHunger;
+            }
+            p.setFoodLevel(hunger);
+        }
+        if(plugin.getDataHolder().playSoundOnRevive()){
+            Sound sound = plugin.getDataHolder().getSoundOnRevive();
+            if(sound!=null){
+                p.playSound(p.getLocation(),sound,10f,1f);
+            }
+        }
+        if(plugin.getDataHolder().applyEffectsOnRevive()){
+            List<PotionEffect> effects = plugin.getDataHolder().getEffectsOnRevive();
+            MuchoDebuger.broadcast("Lista efektow rozmiar: "+effects.size());
+            for(PotionEffect e: effects){
+                if(e==null)continue;
+                try {
+                    p.addPotionEffect(e);
+                }catch (Exception ignored){
+
+                }
+            }
+        }
     }
     private void applyBlindness(){
         Player p = Bukkit.getPlayer(playerID);
